@@ -1,0 +1,57 @@
+to use the packet_processor in its current state:
+
+-have kernel support for /or the following modules:
+	ip_queue
+	ipt_REJECT
+	ipt_ACCEPT
+	ipt_JUMP
+	ip_tables
+
+-have iptables running and some rule that sends packets to the QUEUE target. example:
+
+	iptables --append INPUT --protocol tcp --destination-port 8080 --jump QUEUE
+
+-have a service running on the port from above (i used apache cause its easy)
+
+-compile this thing up
+
+	make
+
+what should currently happen
+
+-you try and connect to your service, it never connects (packets are being dropped)
+
+now start up the packet processor:
+
+ 	./packet_processor
+
+what should now happen
+
+-you try and connect to your service, it works as expected.
+
+pretty cool, huh?
+
+WHATS NEXT:::
+
+
+pull stuff outta the ipq_packet_msg_t, do whats needed, and ACCPET!
+
+FYI, heres the struct:
+
+typedef struct ipq_packet_msg {
+        unsigned long packet_id;        /* ID of queued packet */
+	unsigned long mark;             /* Netfilter mark value */
+	long timestamp_sec;             /* Packet arrival time (seconds) */
+	long timestamp_usec;            /* Packet arrvial time (+useconds) */
+	unsigned int hook;              /* Netfilter hook we rode in on */
+	char indev_name[IFNAMSIZ];      /* Name of incoming interface */
+	char outdev_name[IFNAMSIZ];     /* Name of outgoing interface */
+	unsigned short hw_protocol;     /* Hardware protocol (network order) */
+	unsigned short hw_type;         /* Hardware type */
+	unsigned char hw_addrlen;       /* Hardware address length */
+	unsigned char hw_addr[8];       /* Hardware address */
+	size_t data_len;                /* Length of packet data */
+	unsigned char payload[0];       /* Optional packet data */
+} ipq_packet_msg_t;
+
+
